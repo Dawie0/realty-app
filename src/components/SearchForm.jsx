@@ -1,76 +1,92 @@
 import axios from 'axios'
 import { useState } from "react";
+import CardContainer from './CardContainer';
+
 
 const SearchForm = () => {
-    const [keyword, setKeyword] = useState(null);
-    const [sort, setSort] = useState(null);
-    const [beds, setBeds] = useState(null);
+    const [keyword, setKeyword] = useState('');
+    const [sort, setSort] = useState('');
+    const [beds, setBeds] = useState('');
     const [response, setResponse] = useState(null);
     const [loading, setLoading] = useState(false);
 
 
-    const getLocations = async (req, res) => {
-        const options = {
-            method: "GET",
-            url: "https://realty-in-us.p.rapidapi.com/locations/auto-complete",
-            params: { input: req.query.keyword },
-            headers: {
-              "x-rapidapi-host": "realty-in-us.p.rapidapi.com",
-              "x-rapidapi-key": NEXT_PUBLIC_RAPIDAPI_KEY,
-            },
-          };
-        
-          axios
-            .request(options)
-            .then(function (response) {
-              res.status(200).json(response.data);
-            })
-            .catch(function (error) {
-              console.error(error);
-            })
+    const getProperties = async () => {
+      try {
+        setLoading(true);
+        const location = await axios.get("https://rapid-api-backends.vercel.app/api/location", {
+          params: { keyword },
+        });
+        const { city, state_code } = location.data.autocomplete[0];
+  
+        const res = await axios.get("https://rapid-api-backends.vercel.app/api/properties", {
+          params: { city, state_code, sort, beds },
+        });
+        const { data } = res;
+        setLoading(false);
+        setResponse(data.listings);
+      } catch (error) {
+        setLoading(false);
+      }
     }
-
-    const getProporties = async (req, res) => {
-        const options = {
-            method: "GET",
-            url: "https://realty-in-us.p.rapidapi.com/properties/list-for-sale",
-            params: {
-              state_code: req.query.state_code,
-              city: req.query.city,
-              offset: "0",
-              limit: "20",
-              sort: req.query.sort,
-              beds_min: req.query.beds,
-            },
-            headers: {
-              "x-rapidapi-host": "realty-in-us.p.rapidapi.com",
-              "x-rapidapi-key": NEXT_PUBLIC_RAPIDAPI_KEY,
-            },
-          };
-        
-          axios
-            .request(options)
-            .then(function (response) {
-              res.status(200).json(response.data);
-            })
-            .catch(function (error) {
-              console.error(error);
-            })
-    }
-
       
-
     return (
-        <div className="row justify-content-center mt-4">
-            <div className="col-6">
-                <div className="input-group mb-3">
-                    <input type="text" placeholder="" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
+        <div className="row  mt-4">
+          <div className='row d-flex justify-content-center'>
+            <div className="col-8">
+                <label htmlFor='location' >Enter a location to search for properties</label>
+                <div className="input-group mb-3" id='location'>
+                    <input 
+                      type="text" 
+                      placeholder="eg: New York" 
+                      className="form-control" 
+                      aria-label="Sizing example input" 
+                      aria-describedby="inputGroup-sizing-default" 
+                      value={keyword}
+                      onChange={(e) => setKeyword(e.target.value)}/>
                 </div>
             </div>
-            <button onClick={() => getInfo()}>
-                get info
-            </button>
+            <div className='col-5'>
+              <label htmlFor='sort' >Sort by</label>
+              <select id='sort' className="form-select" aria-label="Default select example" onChange={(e) => setSort(e.target.value)}>
+                <option defaultValue={`relevance`} value="relevance">Relevance</option>
+                <option value="newest">newest</option>
+                <option value="price_high">Price High</option>
+                <option value="price_low">Price Low</option>
+                <option value="price_reduced_date">Price Reduced Date</option>
+                <option value="sqft_high">Square Footage</option>
+                <option value="open_house_date">Open House Date</option>
+                <option value="photos">Photos</option>
+              </select>
+            </div>
+            <div className='col-5'>
+              <label htmlFor='beds' >Minimum number of bedrooms</label>
+              <div className="input-group mb-3">                
+                <input 
+                  id='beds'
+                  type="text" 
+                  placeholder="1" 
+                  className="form-control" 
+                  aria-label="Sizing example input" 
+                  aria-describedby="inputGroup-sizing-default" 
+                  value={beds}
+                  onChange={(e) => setBeds(e.target.value)}/>
+              </div>
+            </div>
+            <div className='col-8 d-flex m-3 justify-content-center'>
+              <button onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                getProperties()}}>
+                  {loading ? <>Loading...</> : <>Search</>}
+              </button>
+            </div>
             
+          </div> 
+          <div className='row'>
+          
+            {response && <CardContainer properties={response}/>}
+          </div> 
         </div>
     )
 }

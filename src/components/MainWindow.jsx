@@ -6,7 +6,6 @@ const MainWindow = () => {
         <div className="container-fluid">
             <NavBar />
             <SearchForm />
-            works
         </div>
     )
 }
