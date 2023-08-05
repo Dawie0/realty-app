@@ -74,7 +74,7 @@ const SearchForm = () => {
               </div>
             </div>
             <div className='col-8 d-flex m-3 justify-content-center'>
-              <button onClick={(e) => {
+              <button className='btn' onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
                 getProperties()}}>

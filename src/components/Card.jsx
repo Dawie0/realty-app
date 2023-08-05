@@ -19,7 +19,10 @@ const Card = ( { property } ) => {
                 </div>
                 <div className="col-12  d-flex justify-content-center align-items-center">
                     <a href={property.rdc_web_url} target="_blank" rel='noreferrer'>
-                        details
+                    <button className="btn2">
+                        Details
+                        <div className=""></div>
+                    </button>
                     </a>
                 </div>
             </div>
