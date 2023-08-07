@@ -60,7 +60,7 @@ const SearchForm = () => {
               </select>
             </div>
             <div className='col-5'>
-              <label htmlFor='beds' >Minimum # of beds</label>
+              <label htmlFor='beds' >Min # of beds</label>
               <div className="input-group mb-3">                
                 <input 
                   id='beds'
